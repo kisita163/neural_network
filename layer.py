@@ -2,28 +2,35 @@ from perceptron import Perceptron
 
 class Layer :
     
-    def __init__(self,num_neurones=1,num_inputs):
+    def __init__(self,num_inputs,num_neurons=1):
         
-        self.neurones     = []
-        self.output_array = []
-        self.init_neurones(num_neurones,num_inputs)
+        self.neurons     = []
+        self.init_neurons(num_neurons,num_inputs)
         
     
     
-    def init_neurones(self,num_neurones,num_inputs):
+    def init_neurons(self,num_neurons,num_inputs):
         
-        for k in range(0,num_neurones-1,num_inputs) : 
+        print('creating neurons...')
+        
+        for k in range(1,num_neurons + 1) : 
             
+            print('creating neuron ' + str(k))
             n = Perceptron(num_inputs)
-            self.neurones.append(n)
+            self.neurons.append(n)
     
     
     def get_neurones(self):
-        return self.neurones 
+        return self.neurons 
+    
         
     
     def inout(self,input_array):
         
-        for n in self.neurones :
+        output_array  = []
+        
+        for n in self.neurons :
             o = n.inout(input_array)
-            self.output_array.append(o)
+            output_array.append(o)
+        
+        return output_array

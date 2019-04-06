@@ -1,52 +1,44 @@
 from perceptron import Perceptron  
+from layer import Layer
   
         
-train_in = [
-    [1, 1],
-    [0.6,0.6],
-    [1, 0],
-    [0, 1],
-    [0, 1],
-    [0, 0],
-    [0.9, 0.9],
-    [0.3, 0.2],
-    [0.9, 0.3],
-    [0.6,0.9]]
+train_in = [[1,1,1],
+            [1,0,1],
+            [1,1,0],
+            [0,1,1],
+            [1,0,0],
+            [0,1,0],
+            [0,0,1],
+            [0,0,0],
+            ]
 
-test_in = [
-    [1, 1],#0
-    [1, 0],#0
-    [0, 1],#0
-    [0, 0],#0
-    ]#1
- 
-#output
-train_out = [
-[1],
-[1],
-[0],
-[0],
-[0],
-[0],
-[1],
-[0],
-[0],
-[1]]
+train_out = [[1],
+             [0],
+             [0],
+             [0],
+             [0],
+             [0],
+             [0],
+             [0],]
 
 
+#Layers
 
-p = Perceptron(2)
+l1 = Layer(3,num_neurons=2) # input  layer
 
-k = p.training(train_in,train_out,-0.8,100)
+l2 = Layer(2,num_neurons=2) # hidden layer
 
-print(p.get_weights_history())
+l3 = Layer(2)               # output layer
 
-#p.plot_output(k,0)
 
-for v in test_in :
-    k = p.inout(v)
-    
-    if k > 0.5 :
-        print(1)
-    else :
-        print(0)
+# training
+
+#connections
+
+o1 = l1.inout(train_in[0])
+
+o2 = l2.inout(o1)
+
+o3 = l3.inout(o2)
+
+

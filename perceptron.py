@@ -6,17 +6,22 @@ import array
 class Perceptron :
     
 
-    def __init__(self,input_lenght,bias=-0.1):#-44.36169230842653):
+    def __init__(self,input_lenght,bias=-0.1,label='output'):
+        self.label        = label
         self.outputs      = []
         self.bias         = bias
         self.input_length = input_lenght
+        
+        self.last_in      = None
+        self.last_out     = None
+        
         self.init_weights(input_lenght)
         
     
     def init_weights(self,length):
         self.weights = np.random.rand(1,length)
 
-        
+             
     def get_weights(self):
         return self.weights[-1]
     
@@ -48,11 +53,24 @@ class Perceptron :
 
         dot_product = np.dot(input_array,self.get_weights()) + self.bias
         
-        return self.sigmoid(dot_product)
+        out = self.sigmoid(dot_product)
+        
+        self.last_in  = input_array
+        self.last_out = out
+        
+        return out
 
 
     def training(self,input_arrays,expected_array,learning_rate, epoch):
         
+        '''
+            This function is used to train the node when used individually to take decision
+            
+            input_arrays   = Training vectors
+            expected_array = expected results array
+            learning_rate  = The learning rate
+            epoch          = Number of iteration
+        '''
         
         for i in range(epoch):
             print('Starting epoch (' + str(i + 1) + ')')
@@ -98,17 +116,36 @@ class Perceptron :
         print('bias is ' + str(self.bias))
        
         return i
+    
+    def update_weight(self,learning_rate_1 = 0.35 ,learning_rate_2 = 0.7 , desired = 0 , above_errors = []):
+        
+        weights = []
+        
+        for w_,w__,i in zip(self.get_weights(),self.get_weights_history()[-2], self.last_in) : 
+            
+            w  = w_ + learning_rate_1 * self.get_error(desired, above_errors) * i  + learning_rate_2 * (w_ - w__) 
+            weights.append(w)
+            
+        self.set_weights(weights)
             
     
-    def plot_output(self,k,train_index):
+    def get_error(self,desired=0,above_errors=[]):
         
-        A = np.array(self.get_outputs())
-        t = np.arange(0,k+1,1)
-       
+        '''  
+            desired      = desired output of the neurons. Used only when this neuron is an output neuron
+            above_errors = errors  from the layer above. Here I consider the product w_jk*sigma_k
+        '''
         
-        plt.close('all')
-        plt.plot(t,A[:,train_index],'r--')
-        plt.show()
-
+        
+        if self.label == 'output':
+            error = self.last_out*(1 - self.last_out)*(desired - self.last_out)
+        else :
+            error = self.last_out*(1 - self.last_out)*sum(above_errors)
+            
+        return error
+            
+            
+            
+            
 
 
