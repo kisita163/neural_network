@@ -1,12 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 import array
 
 class Perceptron :
     
 
-    def __init__(self,input_lenght,bias=-0.1,label='output'):
+    def __init__(self,input_lenght,bias=-0.0,label='output'):
         self.label        = label
         self.outputs      = []
         self.bias         = bias
@@ -19,8 +18,8 @@ class Perceptron :
         
     
     def init_weights(self,length):
-        self.weights = np.random.rand(1,length)
-
+        self.weights = np.random.rand(2,length)
+        
              
     def get_weights(self):
         return self.weights[-1]
@@ -97,7 +96,8 @@ class Perceptron :
                     w = weight + learning_rate*(error)*in_array
                     
                     print('w = '+str(weight) + ' + ' + str(learning_rate)+'*('+str(out)+' - ' + str(expected_array[expected_index][0])+')*'+str(input))
-                    self.bias = self.bias + learning_rate*(error)
+                    
+                    #self.bias = self.bias + learning_rate*(error)
                     weights.append(w)
                 
                   
@@ -109,7 +109,7 @@ class Perceptron :
                 errors.append(error)
                 
             self.outputs.append(o)
-            print('-----------------------------------------------')
+            print('-----------------------------------------------'  )
             print('\n\n\n')
             if np.amax(errors) < 0.02 : 
                 break
@@ -117,16 +117,41 @@ class Perceptron :
        
         return i
     
-    def update_weight(self,learning_rate_1 = 0.35 ,learning_rate_2 = 0.7 , desired = 0 , above_errors = []):
+    def update_weight(self,learning_rate_1 = 0.7 ,learning_rate_2 = 0.7 , desired = 0 , above_errors = []):
         
         weights = []
+        errors  = []
+        
+        print('\n')
+        print('initial weights')
+        print('\n')
+        print(self.get_weights())
+        print('\n')
         
         for w_,w__,i in zip(self.get_weights(),self.get_weights_history()[-2], self.last_in) : 
             
-            w  = w_ + learning_rate_1 * self.get_error(desired, above_errors) * i  + learning_rate_2 * (w_ - w__) 
-            weights.append(w)
+            e   = self.get_error(desired, above_errors)
+            w   = w_ + learning_rate_1 * e * i  + learning_rate_2 * (w_ - w__)
             
+            self.bias = self.bias + learning_rate_1*(e)
+            
+            print('w = ' + str(w_) + ' + ' + str(learning_rate_1) + '*' + str(e) + '*' + str(i) + ' + ' + str(learning_rate_2) + '*(' + str(w_) + ' - ' + str(w__) + ')')
+            print('\n')
+            
+            errors.append(e)
+            weights.append(w)
+    
         self.set_weights(weights)
+        
+        print('New weigths are : ')
+        print('\n\t'  +  str(self.get_weights()))
+        
+        print('\n')
+        
+        print('New errors are : ')
+        print('\n\t' + str(errors))
+        
+        return errors
             
     
     def get_error(self,desired=0,above_errors=[]):
@@ -136,11 +161,20 @@ class Perceptron :
             above_errors = errors  from the layer above. Here I consider the product w_jk*sigma_k
         '''
         
+        #print('Computing error for this ' + self.label + ' neuron')
+        #print('last_out = ' + str(self.last_out))
+        #print('desired  = ' + str(desired))
         
         if self.label == 'output':
+            
             error = self.last_out*(1 - self.last_out)*(desired - self.last_out)
+            
+            print('error = '+ str(self.last_out) + '* (1 - ' + str(self.last_out) + ')*( ' + str(desired) + ' - ' + str(self.last_out) + ')')
+            print('\n')
         else :
             error = self.last_out*(1 - self.last_out)*sum(above_errors)
+            print('error = '+ str(self.last_out) + '* (1 - ' + str(self.last_out) + ')*' + str(sum(above_errors)))
+            print('\n')
             
         return error
             
