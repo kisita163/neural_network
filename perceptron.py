@@ -5,7 +5,7 @@ import array
 class Perceptron :
     
 
-    def __init__(self,input_lenght,bias=-0.0,label='output'):
+    def __init__(self,input_lenght,bias=-0.0,label='output',debug=False):
         self.label        = label
         self.outputs      = []
         self.bias         = bias
@@ -13,12 +13,18 @@ class Perceptron :
         
         self.last_in      = None
         self.last_out     = None
+        self.debug        = debug 
+        
+        self.error_history=[] 
         
         self.init_weights(input_lenght)
-        
-    
+     
+    def traces(self,s):
+        if self.debug == True : 
+            self.traces(s)
+            
     def init_weights(self,length):
-        self.weights = np.random.rand(2,length)
+        self.weights = np.random.rand(2,length) - 0.5
         
              
     def get_weights(self):
@@ -72,19 +78,19 @@ class Perceptron :
         '''
         
         for i in range(epoch):
-            print('Starting epoch (' + str(i + 1) + ')')
-            print('\n')
-            print("Old weights : " + str(self.get_weights()))
+            self.traces('Starting epoch (' + str(i + 1) + ')')
+            self.traces('\n')
+            self.traces("Old weights : " + str(self.get_weights()))
             o = []
             expected_index = 0  
             errors = []
             
             for array in input_arrays : 
-                print('input are : '+ str(array))
+                self.traces('input are : '+ str(array))
                 out  = self.inout(array) 
                 o.append(out) 
-                print('Calculated out is : ' + str(out))
-                print('Expected out is   : ' + str(expected_array[expected_index][0]))
+                self.traces('Calculated out is : ' + str(out))
+                self.traces('Expected out is   : ' + str(expected_array[expected_index][0]))
                 
                 weights = []
         
@@ -95,63 +101,67 @@ class Perceptron :
                     
                     w = weight + learning_rate*(error)*in_array
                     
-                    print('w = '+str(weight) + ' + ' + str(learning_rate)+'*('+str(out)+' - ' + str(expected_array[expected_index][0])+')*'+str(input))
+                    self.traces('w = '+str(weight) + ' + ' + str(learning_rate)+'*('+str(out)+' - ' + str(expected_array[expected_index][0])+')*'+str(input))
                     
                     #self.bias = self.bias + learning_rate*(error)
                     weights.append(w)
                 
                   
                 self.set_weights(weights)
-                print("New weights : " + str(self.get_weights()))
+                self.traces("New weights : " + str(self.get_weights()))
                 expected_index = expected_index + 1
-                print('\n')
+                self.traces('\n')
                 
                 errors.append(error)
                 
             self.outputs.append(o)
-            print('-----------------------------------------------'  )
-            print('\n\n\n')
+            self.traces('-----------------------------------------------'  )
+            self.traces('\n\n\n')
             if np.amax(errors) < 0.02 : 
                 break
-        print('bias is ' + str(self.bias))
+        self.traces('bias is ' + str(self.bias))
        
         return i
     
-    def update_weight(self,learning_rate_1 = 0.7 ,learning_rate_2 = 0.7 , desired = 0 , above_errors = []):
+    def update_weight(self,learning_rate_1 = 0.8 ,learning_rate_2 = 0.8 , desired = 0 , above_errors = []):
         
         weights = []
-        errors  = []
         
-        print('\n')
-        print('initial weights')
-        print('\n')
-        print(self.get_weights())
-        print('\n')
+        self.traces('\n')
+        self.traces('initial weights')
+        self.traces('\n')
+        self.traces(self.get_weights())
+        self.traces('\n')
+        
+        e   = self.get_error(desired, above_errors)
         
         for w_,w__,i in zip(self.get_weights(),self.get_weights_history()[-2], self.last_in) : 
             
-            e   = self.get_error(desired, above_errors)
             w   = w_ + learning_rate_1 * e * i  + learning_rate_2 * (w_ - w__)
             
-            self.bias = self.bias + learning_rate_1*(e)
+            self.bias = self.bias + learning_rate_1*(e)  + learning_rate_2 * (w_ - w__)
             
-            print('w = ' + str(w_) + ' + ' + str(learning_rate_1) + '*' + str(e) + '*' + str(i) + ' + ' + str(learning_rate_2) + '*(' + str(w_) + ' - ' + str(w__) + ')')
-            print('\n')
+            self.traces('w = ' + str(w_) + ' + ' + str(learning_rate_1) + '*' + str(e) + '*' + str(i) + ' + ' + str(learning_rate_2) + '*(' + str(w_) + ' - ' + str(w__) + ')')
+            self.traces('\n')
             
-            errors.append(e)
+    
             weights.append(w)
     
         self.set_weights(weights)
         
-        print('New weigths are : ')
-        print('\n\t'  +  str(self.get_weights()))
+        self.traces('New weigths are : ')
+        self.traces('\n\t'  +  str(self.get_weights()))
         
-        print('\n')
+        self.traces('\n')
         
-        print('New errors are : ')
-        print('\n\t' + str(errors))
+        self.traces('New error is : ')
+        self.traces('\n\t' + str(e))
         
-        return errors
+        return e
+    
+    def get_error_history(self):
+        
+        return self.error_history
             
     
     def get_error(self,desired=0,above_errors=[]):
@@ -161,21 +171,22 @@ class Perceptron :
             above_errors = errors  from the layer above. Here I consider the product w_jk*sigma_k
         '''
         
-        #print('Computing error for this ' + self.label + ' neuron')
-        #print('last_out = ' + str(self.last_out))
-        #print('desired  = ' + str(desired))
+        #self.traces('Computing error for this ' + self.label + ' neuron')
+        #self.traces('last_out = ' + str(self.last_out))
+        #self.traces('desired  = ' + str(desired))
         
         if self.label == 'output':
             
             error = self.last_out*(1 - self.last_out)*(desired - self.last_out)
             
-            print('error = '+ str(self.last_out) + '* (1 - ' + str(self.last_out) + ')*( ' + str(desired) + ' - ' + str(self.last_out) + ')')
-            print('\n')
+            self.traces('error = '+ str(self.last_out) + '* (1 - ' + str(self.last_out) + ')*( ' + str(desired) + ' - ' + str(self.last_out) + ')')
+            self.traces('\n')
         else :
             error = self.last_out*(1 - self.last_out)*sum(above_errors)
-            print('error = '+ str(self.last_out) + '* (1 - ' + str(self.last_out) + ')*' + str(sum(above_errors)))
-            print('\n')
-            
+            self.traces('error = '+ str(self.last_out) + '* (1 - ' + str(self.last_out) + ')*' + str(sum(above_errors)))
+            self.traces('\n')
+        
+        self.error_history.append(error)  
         return error
             
             

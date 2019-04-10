@@ -21,6 +21,11 @@ class Layer :
             self.neurons.append(n)
     
     
+    def get_label(self):
+        
+        return self.label
+    
+    
     def get_neurons(self):
         return self.neurons 
     
