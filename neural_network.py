@@ -82,7 +82,12 @@ class Neural :
 
         for epoch in range(0,epoch):
             
+            index  = 1
+            
+            
             for v,d in zip(train_in,train_out) : 
+                
+                self.traces('Processing index ' + str(index) + '('+str(epoch)+')')
                 
                 self.inout(v)
 
@@ -93,16 +98,23 @@ class Neural :
                 for l in reversed(self.get_layers()) :
                     # compute error for each neurons of this layer
                     errors = []
-                        
+                    
+                    i = 0
+                    
                     for n in l.get_neurons() : 
                         if l.get_label() == 'output': 
-
-                            e = n.update_weight(desired=d[0])
+                            
+                            e = n.update_weight(desired=d[i])
+                            
                         else : 
                         
                             e = n.update_weight(above_errors=above_errors)
                     
                         errors.append(e)
+                        
+                        i = i + 1
                             
-                    above_errors  = errors      
+                    above_errors  = errors  
+                    
+                index = index  + 1    
             
