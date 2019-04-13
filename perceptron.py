@@ -1,6 +1,6 @@
 import numpy as np
+from math import tanh
 
-import array
 
 class Perceptron :
     
@@ -39,7 +39,12 @@ class Perceptron :
 
         
     def sigmoid(self,x):
-        return 1 / ( 1 + np.exp(-x))  
+        
+        tan_hyp  = tanh(0.5*x)
+        
+        return (0.5*( 1 + tan_hyp))
+        #return (1 / (1 + np.exp(-x)))
+    
          
     
     def sigmoid_derivative(self,x):
